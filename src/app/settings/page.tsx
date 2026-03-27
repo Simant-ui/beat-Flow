@@ -20,8 +20,10 @@ import {
   Database,
   Smartphone,
   Eye,
-  LogOut
+  LogOut,
+  FolderOpen
 } from 'lucide-react';
+
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
@@ -85,6 +87,23 @@ export default function SettingsPage() {
   const { user, signOut } = useAuthStore();
   const [shareActivity, setShareActivity] = React.useState(true);
   const [notifications, setNotifications] = React.useState(true);
+  const [downloadPath, setDownloadPath] = React.useState('Downloads');
+
+  const chooseDirectory = async () => {
+    try {
+      if ('showDirectoryPicker' in window) {
+        // @ts-ignore
+        const handle = await window.showDirectoryPicker();
+        setDownloadPath(handle.name);
+        toast.success(`Direct saved to: ${handle.name}`, { icon: '📂' });
+      } else {
+        toast("Change folder in browser settings (Standard mode active)", { icon: '📂' });
+      }
+    } catch (e) {
+      console.log('User cancelled picker');
+    }
+  };
+
 
   return (
     <div className={cn(
@@ -258,6 +277,54 @@ export default function SettingsPage() {
             </div>
           </div>
 
+
+          <div className="space-y-4">
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Storage Path</h2>
+            <div className="space-y-3">
+              <SettingsItem 
+                icon={FolderOpen} 
+                label="Download Destination" 
+                description={`Currently saving to: ${downloadPath}`}
+                theme={theme}
+              >
+                <button 
+                  onClick={chooseDirectory}
+                  className={cn(
+                    "px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+                    theme === 'dark' ? "bg-blue-600/10 text-blue-500 hover:bg-blue-600 hover:text-white" : "bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white"
+                  )}
+                >
+                  Change Folder
+                </button>
+              </SettingsItem>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Device & App Status</h2>
+            <div className="space-y-3">
+              <SettingsItem 
+                icon={Smartphone} 
+                label="PWA Installation" 
+                description={typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches) ? "Application is currently installed" : "Install for offline access"}
+                theme={theme}
+              >
+                <div className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                  {typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches) ? "Active" : "Available"}
+                </div>
+              </SettingsItem>
+              <SettingsItem 
+                icon={Info} 
+                label="System Version" 
+                description="BeatFlow Platinum 2.0.4"
+                theme={theme}
+              >
+                <span className="text-[10px] font-bold text-zinc-500">v2.0.4</span>
+              </SettingsItem>
+            </div>
+          </div>
+
           <div className="pt-10 border-t border-white/5 space-y-4">
               <button 
                 onClick={() => {
@@ -270,7 +337,7 @@ export default function SettingsPage() {
                   SIGN OUT FROM BEATFLOW
               </button>
               <div className="text-center py-4">
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em]">Version 2.0.4 - Platinum Edition</p>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em]">Built for high-fidelity listeners</p>
                 <p className="text-[10px] text-blue-500 mt-1 font-black underline uppercase tracking-widest cursor-pointer">Terms & Security Policy</p>
               </div>
           </div>
@@ -279,3 +346,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+

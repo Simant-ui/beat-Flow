@@ -7,8 +7,10 @@ import { usePlayerStore } from '@/store/usePlayerStore';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { fetchRelatedSongs } from '@/lib/youtube';
 
 const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
+
 
 export const MusicPlayer = () => {
   const { 
@@ -36,8 +38,9 @@ export const MusicPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [activeTab, setActiveTab] = useState<'PLAYER' | 'LYRICS'>('PLAYER');
+  const [activeTab, setActiveTab] = useState<'PLAYER' | 'LYRICS' | 'RELATED'>('PLAYER');
   const [lyricsLanguage, setLyricsLanguage] = useState<'en' | 'ne' | 'hi'>('en');
+  const [relatedSongs, setRelatedSongs] = useState<any[]>([]);
   const playerRef = useRef<any>(null);
 
   // Reset progress and ready state when song changes
@@ -45,7 +48,14 @@ export const MusicPlayer = () => {
     setPlayed(0);
     setDuration(0);
     setIsReady(false);
+    
+    // Fetch related songs
+    if (currentSong) {
+        fetchRelatedSongs(currentSong).then(setRelatedSongs);
+    }
   }, [currentSong?.id]);
+
+
 
   // Real-time Session Listening Timer
   useEffect(() => {
@@ -334,68 +344,149 @@ export const MusicPlayer = () => {
                 </div>
             </div>
 
-            {/* LYRICS CONTENT (Follow-through scroll like Spotify) */}
-            <div className="px-8 pt-6 pb-40">
-                <div className="w-full pt-10 pb-10 border-t border-white/5 space-y-8">
-                    {/* Header for Lyrics Section */}
-                    <div className="flex items-center justify-between px-1">
-                        <div className="flex items-center gap-2 text-blue-500">
-                            <Languages size={20} className="animate-pulse" />
-                            <span className="text-xs font-black uppercase tracking-[0.2em]">Lyrics Ready</span>
-                        </div>
-                        <div className="flex gap-2 p-1 bg-white/5 rounded-2xl border border-white/5">
-                            {(['en', 'ne', 'hi'] as const).map(lang => (
-                                <button
-                                    key={lang}
-                                    onClick={() => setLyricsLanguage(lang)}
-                                    className={cn(
-                                        "px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all duration-300",
-                                        lyricsLanguage === lang ? "bg-white text-black shadow-lg" : "text-white/30 hover:text-white"
-                                    )}
-                                >
-                                    {lang}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Dynamic Lyrics Content */}
-                    <div className="space-y-8 pt-4">
-                        <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            className="bg-white/5 border border-white/5 p-8 rounded-[40px] backdrop-blur-md"
-                        >
-                            <p className="text-2xl font-black text-white leading-relaxed mb-6">
-                                {lyricsLanguage === 'ne' ? 'गीतका शब्दहरू यहाँ उपलब्ध गराइँदैछ...' : 
-                                 lyricsLanguage === 'hi' ? 'बोल यहाँ लोड हो रहे हैं...' : 
-                                 'Fetching original lyrics...'}
-                            </p>
-                            
-                            <div className="space-y-4 text-zinc-400 font-medium text-lg leading-loose italic opacity-60">
-                                <p>"{currentSong.title}"</p>
-                                <p>by {currentSong.artist}</p>
-                            </div>
-
-                            <button 
-                                onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(currentSong.title + ' ' + currentSong.artist + ' ' + lyricsLanguage + ' lyrics')}`, '_blank')}
-                                className="w-full py-5 rounded-[25px] bg-blue-500 hover:bg-blue-600 text-white text-xs font-black uppercase tracking-widest transition-all mt-10 shadow-xl shadow-blue-500/20 active:scale-95"
-                            >
-                                Tap to Read Full {lyricsLanguage.toUpperCase()} Lyrics
-                            </button>
-                        </motion.div>
-
-                        <div className="px-4 text-center space-y-4">
-                            <p className="text-[11px] text-zinc-600 font-black uppercase tracking-[0.2em]">Music matched to current track</p>
-                            <div className="flex justify-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500/40 animate-bounce" />
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500/40 animate-bounce delay-100" />
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500/40 animate-bounce delay-200" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Tab Navigation */}
+            <div className="flex items-center justify-center gap-1 px-8 mb-6">
+                {(['PLAYER', 'LYRICS', 'RELATED'] as const).map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={cn(
+                            "px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all",
+                            activeTab === tab ? "bg-white text-black shadow-lg" : "text-zinc-500 hover:text-white"
+                        )}
+                    >
+                        {tab}
+                    </button>
+                ))}
             </div>
+
+            {/* TAB CONTENT (Switches based on activeTab) */}
+            <div className="px-8 pb-40 min-h-[400px]">
+                <AnimatePresence mode="wait">
+                    {activeTab === 'PLAYER' && (
+                        <motion.div 
+                            key="player-stats"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="bg-white/5 border border-white/5 p-8 rounded-[40px] space-y-6"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-500">
+                                    <Volume2 />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Audio Quality</p>
+                                    <h4 className="text-white font-bold">Lossless Pro (256kbps)</h4>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center text-purple-500">
+                                    <CheckCircle2 />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Source Verified</p>
+                                    <h4 className="text-white font-bold">Official YouTube Audio</h4>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'LYRICS' && (
+                        <motion.div 
+                            key="lyrics"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="space-y-8"
+                        >
+                            {/* Lyrics Header */}
+                            <div className="flex items-center justify-between px-1">
+                                <div className="flex items-center gap-2 text-blue-500">
+                                    <Languages size={18} />
+                                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">Translations Active</span>
+                                </div>
+                                <div className="flex gap-1.5 p-1 bg-white/5 rounded-2xl border border-white/10">
+                                    {(['en', 'ne', 'hi'] as const).map(lang => (
+                                        <button
+                                            key={lang}
+                                            onClick={() => setLyricsLanguage(lang)}
+                                            className={cn(
+                                                "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all duration-300",
+                                                lyricsLanguage === lang ? "bg-white text-black shadow-lg" : "text-white/30 hover:text-white"
+                                            )}
+                                        >
+                                            {lang}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Dynamic Lyrics Content */}
+                            <div className="pt-4">
+                                <div className="bg-white/5 border border-white/5 p-8 rounded-[40px] backdrop-blur-md">
+                                    <p className="text-2xl font-black text-white leading-relaxed mb-6">
+                                        {lyricsLanguage === 'ne' ? 'गीतका शब्दहरू उपलब्ध छैनन्...' : 
+                                        lyricsLanguage === 'hi' ? 'बोल उपलब्ध नहीं हैं...' : 
+                                        'No official lyrics found.'}
+                                    </p>
+                                    
+                                    <div className="space-y-4 text-zinc-400 font-medium text-lg leading-loose italic opacity-60">
+                                        <p>"{currentSong.title}"</p>
+                                        <p>by {currentSong.artist}</p>
+                                    </div>
+
+                                    <button 
+                                        onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(currentSong.title + ' ' + currentSong.artist + ' ' + lyricsLanguage + ' lyrics')}`, '_blank')}
+                                        className="w-full py-5 rounded-[25px] bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest transition-all mt-10 shadow-xl shadow-blue-500/20 active:scale-95"
+                                    >
+                                        Full {lyricsLanguage.toUpperCase()} Lyrics on Google
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'RELATED' && (
+                        <motion.div 
+                            key="related"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-4"
+                        >
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-6 px-1">Up Next & Related</h3>
+                            <div className="space-y-3">
+                                {relatedSongs.length > 0 ? relatedSongs.map((song, i) => (
+                                    <button 
+                                        key={song.id}
+                                        onClick={() => setCurrentSong(song)}
+                                        className="w-full flex items-center gap-4 p-3 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group scale-100 active:scale-98"
+                                    >
+                                        <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
+                                            <img src={song.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
+                                        </div>
+                                        <div className="flex-1 text-left overflow-hidden">
+                                            <h4 className="text-sm font-bold text-white truncate group-hover:text-blue-400 transition-colors">{song.title}</h4>
+                                            <p className="text-[11px] text-zinc-500 font-medium truncate mt-0.5">{song.artist}</p>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
+                                            <Play size={14} className="fill-current" />
+                                        </div>
+                                    </button>
+                                )) : (
+                                    <div className="py-20 text-center">
+                                        <div className="w-12 h-12 border-2 border-zinc-800 border-t-white rounded-full animate-spin mx-auto mb-4" />
+                                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-black">Loading similar vibes...</p>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
           </>
         ) : (
           <>

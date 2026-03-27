@@ -7,6 +7,7 @@ const withPWA = withPWAInit({
   skipWaiting: true,
 });
 
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {

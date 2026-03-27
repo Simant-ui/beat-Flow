@@ -17,8 +17,34 @@ export const Header = () => {
   const theme = usePlayerStore(state => state.theme);
   const downloadQueue = usePlayerStore(state => state.downloadQueue);
   const [isDownloadsOpen, setIsDownloadsOpen] = React.useState(false);
+  const [deferredPrompt, setDeferredPrompt] = React.useState<any>(null);
+  const [isStandalone, setIsStandalone] = React.useState(false);
+
+  React.useEffect(() => {
+    // Check if standalone
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+        setIsStandalone(true);
+    }
+
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+    }
+  };
 
   // Active downloads count
+
   const activeCount = downloadQueue.filter(d => d.status === 'DOWNLOADING').length;
 
   return (
@@ -67,12 +93,22 @@ export const Header = () => {
           
           <ProfileSection />
 
+          {deferredPrompt && !isStandalone && (
+            <button
+                onClick={handleInstall}
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-600/10 border border-blue-500/20 rounded-full text-[10px] font-black text-blue-500 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all active:scale-95"
+            >
+                Install App
+            </button>
+          )}
+
           <button 
             onClick={() => router.push('/settings')}
             className="p-2 text-zinc-400 hover:text-white transition-colors"
           >
             <Settings className="w-5 h-5" />
           </button>
+
         </div>
       </div>
     </header>

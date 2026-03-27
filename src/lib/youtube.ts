@@ -1,4 +1,6 @@
 import { Song } from '@/types';
+import toast from 'react-hot-toast';
+
 
 const API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
 const BASE_URL = 'https://www.googleapis.com/youtube/v3';
@@ -56,12 +58,25 @@ export const fetchTrendingMusic = async (isNepali: boolean = false): Promise<Son
   }
 };
 
+const searchCache = new Map<string, Song[]>();
+let lastQuery = '';
+
 export const searchMusic = async (query: string): Promise<Song[]> => {
-  if (!query.trim()) return [];
+  const trimmedQuery = query.trim().toLowerCase();
+  if (!trimmedQuery) return [];
+
+  // 1. Prevent redundant search for the same exact previous query
+  if (trimmedQuery === lastQuery) return [];
+  lastQuery = trimmedQuery;
+
+  // 2. Check local cache to save API Quota (very important for daily 10k limit)
+  if (searchCache.has(trimmedQuery)) {
+      console.log('Returning cached results for:', trimmedQuery);
+      return searchCache.get(trimmedQuery) || [];
+  }
 
   if (!API_KEY) {
     console.warn('YouTube API Key missing. Falling back to mock data.');
-    // Simulated delay
     await new Promise(resolve => setTimeout(resolve, 800));
     return Array.from({ length: 12 }).map((_, i) => ({
       id: `mock-${i}-${Date.now()}`,
@@ -72,26 +87,91 @@ export const searchMusic = async (query: string): Promise<Song[]> => {
   }
 
   try {
-    const response = await fetch(
-      `${BASE_URL}/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&maxResults=12&key=${API_KEY}`
+    // Note: We removed videoCategoryId=10 to find all related video songs 
+    // that might be categorized as "Entertainment" or "Film" instead of just "Music"
+    // We increase maxResults to 20+ to show more variety like actual YouTube
+    const musicQuery = trimmedQuery + ' music video song';
+    console.log('Searching YouTube for:', musicQuery);
+    
+    let response = await fetch(
+      `${BASE_URL}/search?part=snippet&q=${encodeURIComponent(musicQuery)}&type=video&maxResults=25&key=${API_KEY}`
     );
-    const data = await response.json();
+    let data = await response.json();
+
+    if (data.error) {
+        // Show specific YouTube error message (e.g., quotaExceeded)
+        const errorMsg = data.error.message?.includes('quota') 
+            ? 'YouTube API daily limit reached. Please try again tomorrow or use a new key.' 
+            : `YouTube Error: ${data.error.message}`;
+        console.error('YouTube API Error:', data.error.message);
+        toast.error(errorMsg); 
+        return [];
+    }
+
+    // Fallback search if zero results
+    if ((!data.items || data.items.length === 0) && query.length > 2) {
+        console.log('No results for enhanced query, trying original query:', query);
+        response = await fetch(
+          `${BASE_URL}/search?part=snippet&q=${encodeURIComponent(trimmedQuery)}&type=video&maxResults=25&key=${API_KEY}`
+        );
+        data = await response.json();
+    }
 
     if (!data.items) return [];
 
-    return data.items.map((item: any) => ({
+    const results = data.items.map((item: any) => ({
       id: item.id.videoId,
       title: item.snippet.title,
       artist: item.snippet.channelTitle,
       thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
       channelId: item.snippet.channelId,
     }));
+
+    // Cache results (max 20 entries)
+    if (searchCache.size > 20) searchCache.delete(searchCache.keys().next().value);
+    searchCache.set(trimmedQuery, results);
+
+    return results;
   } catch (error) {
     console.error('Error searching music:', error);
     return [];
   }
 };
 
+
 export const searchMusicByCategory = async (category: string): Promise<Song[]> => {
   return searchMusic(`${category} music hits 2024`);
+};
+
+export const fetchRelatedSongs = async (song: Song): Promise<Song[]> => {
+    if (!API_KEY) return [];
+    
+    try {
+        // We search for songs similar to the current one by using artist and title
+        const query = `${song.artist} ${song.title.split('(')[0]} official music`;
+        console.log('Fetching related songs for:', query);
+        
+        const response = await fetch(
+          `${BASE_URL}/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10&key=${API_KEY}`
+        );
+        const data = await response.json();
+    
+        if (!data.items) {
+            if (data.error) console.error('Related Search Error:', data.error.message);
+            return [];
+        }
+    
+        // Filter out the current song from related results
+        return data.items
+            .filter((item: any) => item.id.videoId !== song.id)
+            .map((item: any) => ({
+                id: item.id.videoId,
+                title: item.snippet.title,
+                artist: item.snippet.channelTitle,
+                thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+            }));
+    } catch (error) {
+        console.error('Error fetching related songs:', error);
+        return [];
+    }
 };

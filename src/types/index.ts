@@ -60,7 +60,9 @@ export interface PlayerState {
   downloadQueue: DownloadProgress[];
   startDownload: (song: Song) => void;
   removeDownloadFromQueue: (songId: string) => void;
+  addTransferredSong: (song: Song) => void;
 }
+
 
 export interface Playlist {
   id: string;

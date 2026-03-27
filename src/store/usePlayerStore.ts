@@ -163,7 +163,13 @@ export const usePlayerStore = create<PlayerState>()(
       removeDownloadFromQueue: (songId: string) => 
         set((state) => ({ downloadQueue: state.downloadQueue.filter(d => d.songId !== songId) })),
         
+      addTransferredSong: (song: Song) =>
+        set((state) => ({ 
+            downloads: [...state.downloads.filter(s => s.id !== song.id), song] 
+        })),
+        
       next: () => {
+
         const { queue, currentSong } = get();
         if (queue.length === 0) return;
         

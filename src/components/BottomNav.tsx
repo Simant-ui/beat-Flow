@@ -3,16 +3,19 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, Library, User } from 'lucide-react';
+import { Home, Search, Library, User, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/search', icon: Search, label: 'Search' },
+  { href: '/transfer', icon: Share2, label: 'Share' },
   { href: '/library', icon: Library, label: 'Library' },
   { href: '/profile', icon: User, label: 'Profile' },
 ];
+
+
 
 export const BottomNav = () => {
   const pathname = usePathname();

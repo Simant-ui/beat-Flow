@@ -70,16 +70,9 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   }, [setUser, setLoading]);
 
   React.useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(registration => {
-          console.log('SW registered: ', registration);
-        }).catch(registrationError => {
-          console.log('SW registration failed: ', registrationError);
-        });
-      });
-    }
+    // Service Worker registration is now handled by next-pwa plugin config
   }, []);
+
 
   return (
     <div className={cn(
