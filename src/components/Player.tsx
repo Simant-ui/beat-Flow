@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-const ReactPlayer = dynamic(() => import('react-player').then(mod => mod.default), { ssr: false }) as any;
-import { Play, Pause, SkipBack, SkipForward, Maximize2, Minimize2, Heart, Volume2, X, Download, CheckCircle2, Languages, FileText } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Maximize2, Minimize2, Heart, Volume2, X, Download, CheckCircle2, Languages } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+
+const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
 
 export const MusicPlayer = () => {
   const { 
@@ -57,6 +58,12 @@ export const MusicPlayer = () => {
     return () => clearInterval(interval);
   }, [isPlaying, isReady, incrementListeningTime]);
 
+  const [hasWindow, setHasWindow] = useState(false);
+  useEffect(() => {
+    setHasWindow(true);
+  }, []);
+
+
   if (!currentSong) return null;
 
   const handleProgress = (state: any) => {
@@ -64,8 +71,10 @@ export const MusicPlayer = () => {
       setPlayed(state.played);
       // Force duration detection if it's still missing during playback
       if (duration === 0 && playerRef.current) {
-        const d = playerRef.current.getDuration();
-        if (d && d > 0) setDuration(d);
+        try {
+          const d = playerRef.current.getDuration();
+          if (d && d > 0) setDuration(d);
+        } catch (e) {}
       }
     }
   };
@@ -77,15 +86,19 @@ export const MusicPlayer = () => {
   const handleReady = () => {
     setIsReady(true);
     if (playerRef.current) {
-        const d = playerRef.current.getDuration();
-        if (d && d > 0) setDuration(d);
+        try {
+          const d = playerRef.current.getDuration();
+          if (d && d > 0) setDuration(d);
+        } catch (e) {}
     }
   };
 
   const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     setPlayed(value);
-    playerRef.current?.seekTo(value);
+    if (playerRef.current) {
+        playerRef.current.seekTo(value);
+    }
   };
 
   const handleDownload = (e: React.MouseEvent) => {
@@ -142,35 +155,29 @@ export const MusicPlayer = () => {
       </AnimatePresence>
 
       {/* Music Engine - Hidden but active */}
-      <div className="fixed top-[-1000px] left-[-1000px] w-[200px] h-[112px] opacity-0 pointer-events-none -z-50">
-        <ReactPlayer
-          ref={playerRef}
-          url={songUrl}
-          playing={isPlaying}
-          volume={volume}
-          muted={false}
-          playsinline={true}
-          onProgress={handleProgress}
-          onDuration={handleDuration}
-          onEnded={next}
-          onReady={handleReady}
-          onStart={() => setIsReady(true)}
-          onBuffer={() => setIsReady(false)}
-          onBufferEnd={() => setIsReady(true)}
-          onError={(e: any) => {
-            console.error('Playback Error:', e);
-            toast.error("Playback failed - Retrying...", { position: 'bottom-center' });
-            // Try to recover by toggling play
-            setTimeout(() => {
-                if (isPlaying) {
-                    setPlaying(false);
-                    setTimeout(() => setPlaying(true), 100);
-                }
-            }, 1000);
-          }}
-          config={{
-            youtube: {
-                playerVars: { 
+      {hasWindow && (
+        <div className="fixed -top-[200px] -left-[200px] w-48 h-24 opacity-0 pointer-events-none -z-[100]">
+          <ReactPlayer
+            ref={playerRef}
+            url={songUrl}
+            playing={isPlaying}
+            volume={volume}
+            muted={false}
+            playsinline={true}
+            onProgress={handleProgress}
+            onDuration={handleDuration}
+            onEnded={next}
+            onReady={handleReady}
+            onStart={() => setIsReady(true)}
+            onBuffer={() => setIsReady(false)}
+            onBufferEnd={() => setIsReady(true)}
+            onError={(e: any) => {
+              console.error('Playback Error:', e);
+              setIsReady(false);
+            }}
+            config={{
+              youtube: {
+                playerVars: {
                   autoplay: 1,
                   controls: 0,
                   modestbranding: 1,
@@ -180,12 +187,13 @@ export const MusicPlayer = () => {
                   disablekb: 1,
                   origin: typeof window !== 'undefined' ? window.location.origin : '',
                 }
-            }
-          }}
-          width="100%"
-          height="100%"
-        />
-      </div>
+              }
+            }}
+            width="100%"
+            height="100%"
+          />
+        </div>
+      )}
 
       <div className={cn(
         "relative z-10 w-full h-full mx-auto overflow-y-auto no-scrollbar scroll-smooth",
