@@ -83,8 +83,8 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className={cn(
-        "min-h-screen transition-colors duration-500 pb-40",
-        theme === 'dark' ? "bg-zinc-950 text-white" : "bg-white text-zinc-900"
+      "min-h-screen transition-colors duration-500 pb-40",
+      theme === 'dark' ? "bg-zinc-950 text-white" : "bg-white text-zinc-900"
     )}>
       <Header />
       <main className="max-w-4xl mx-auto pt-24 px-6">
@@ -93,7 +93,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <MusicPlayer />
       <BottomNav />
       <InstallPrompt />
-      <Toaster 
+      <Toaster
         position="top-center"
         toastOptions={{
           style: {

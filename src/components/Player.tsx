@@ -142,7 +142,7 @@ export const MusicPlayer = () => {
       </AnimatePresence>
 
       {/* Music Engine - Hidden but active */}
-      <div className="absolute top-0 left-0 w-0.5 h-0.5 opacity-0 overflow-hidden pointer-events-none">
+      <div className="fixed top-[-1000px] left-[-1000px] w-[200px] h-[112px] opacity-0 pointer-events-none -z-50">
         <ReactPlayer
           ref={playerRef}
           url={songUrl}
@@ -154,9 +154,19 @@ export const MusicPlayer = () => {
           onDuration={handleDuration}
           onEnded={next}
           onReady={handleReady}
+          onStart={() => setIsReady(true)}
+          onBuffer={() => setIsReady(false)}
+          onBufferEnd={() => setIsReady(true)}
           onError={(e: any) => {
             console.error('Playback Error:', e);
             toast.error("Playback failed - Retrying...", { position: 'bottom-center' });
+            // Try to recover by toggling play
+            setTimeout(() => {
+                if (isPlaying) {
+                    setPlaying(false);
+                    setTimeout(() => setPlaying(true), 100);
+                }
+            }, 1000);
           }}
           config={{
             youtube: {
@@ -168,6 +178,7 @@ export const MusicPlayer = () => {
                   showinfo: 0,
                   iv_load_policy: 3,
                   disablekb: 1,
+                  origin: typeof window !== 'undefined' ? window.location.origin : '',
                 }
             }
           }}
