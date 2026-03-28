@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { PlayerState, Song, DownloadProgress } from '@/types';
+import toast from 'react-hot-toast';
 
 export const usePlayerStore = create<PlayerState>()(
   persist(
@@ -63,8 +64,10 @@ export const usePlayerStore = create<PlayerState>()(
         set((state) => {
           const isDownloaded = state.downloads.some((s) => s.id === song.id);
           if (isDownloaded) {
+            toast.success("Removed from Library", { icon: '🗑️' });
             return { downloads: state.downloads.filter((s) => s.id !== song.id) };
           }
+          toast.success("Added to Library", { icon: '💾' });
           return { downloads: [song, ...state.downloads] };
         }),
 

@@ -49,7 +49,7 @@ export const Header = () => {
 
   return (
     <header className={cn(
-        "fixed top-0 left-0 right-0 z-40 px-6 py-4 border-b safe-top transition-colors duration-500",
+        "fixed top-0 left-0 right-0 z-40 px-6 py-4 border-b safe-top transition-colors duration-500 pt-[env(safe-area-inset-top)]",
         theme === 'dark' ? "glass-dark border-white/5 shadow-2xl shadow-black/40" : "bg-white/80 backdrop-blur-xl border-zinc-100 shadow-sm"
     )}>
       <div className="flex items-center justify-between max-w-4xl mx-auto">

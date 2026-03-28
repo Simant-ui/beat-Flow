@@ -46,12 +46,14 @@ export default function LibraryPage() {
         title: file.name.replace(/\.[^/.]+$/, ""),
         artist: 'Local File',
         thumbnail: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop',
-        url: url
+        url: url,
+        sizeMB: Math.round((file.size / (1024 * 1024)) * 10) / 10
     };
 
+    usePlayerStore.getState().addTransferredSong(newSong);
     setCurrentSong(newSong);
-    toast.success(`Playing: ${newSong.title}`, {
-        icon: '🎵',
+    toast.success(`Imported: ${newSong.title}`, {
+        icon: '📁',
         style: {
             borderRadius: '20px',
             background: '#18181b',

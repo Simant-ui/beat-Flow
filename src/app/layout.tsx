@@ -39,7 +39,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`${inter.className} transition-colors duration-500`}>
+      <body className={`${inter.className} transition-colors duration-500 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]`}>
         <AppLayout>{children}</AppLayout>
       </body>
     </html>

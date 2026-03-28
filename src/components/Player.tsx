@@ -73,6 +73,25 @@ export const MusicPlayer = () => {
     setHasWindow(true);
   }, []);
 
+  // Media Session hook for background playback and lock screen controls
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'mediaSession' in navigator && currentSong) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title,
+        artist: currentSong.artist,
+        album: 'BeatFlow Music',
+        artwork: [
+          { src: currentSong.thumbnail, sizes: '512x512', type: 'image/jpeg' },
+        ],
+      });
+
+      navigator.mediaSession.setActionHandler('play', () => setPlaying(true));
+      navigator.mediaSession.setActionHandler('pause', () => setPlaying(false));
+      navigator.mediaSession.setActionHandler('previoustrack', () => previous());
+      navigator.mediaSession.setActionHandler('nexttrack', () => next());
+    }
+  }, [currentSong?.id, next, previous, setPlaying]);
+
 
   if (!currentSong) return null;
 

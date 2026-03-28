@@ -76,11 +76,11 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className={cn(
-      "min-h-screen transition-colors duration-500 pb-40",
+      "min-h-screen transition-colors duration-500 pb-40 pt-[env(safe-area-inset-top)]",
       theme === 'dark' ? "bg-zinc-950 text-white" : "bg-white text-zinc-900"
     )}>
       <Header />
-      <main className="max-w-4xl mx-auto pt-24 px-6">
+      <main className="max-w-4xl mx-auto pt-24 px-6 pb-[env(safe-area-inset-bottom)]">
         {children}
       </main>
       <MusicPlayer />
