@@ -143,7 +143,7 @@ export const MusicPlayer = () => {
       "fixed z-50 transition-all duration-500 ease-in-out",
       isExpanded 
         ? "inset-0 h-full w-full bg-black flex flex-col active overflow-hidden" 
-        : "bottom-[76px] left-4 right-4 h-[72px] glass-dark border border-white/10 rounded-2xl shadow-2xl shadow-black/40 px-4"
+        : "bottom-[76px] left-0 right-0 sm:left-4 sm:right-4 h-[72px] glass-dark border border-white/10 rounded-none sm:rounded-2xl shadow-2xl shadow-black/40 px-4"
     )}>
       {/* Background for Expanded Player */}
       <AnimatePresence>
