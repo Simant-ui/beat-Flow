@@ -12,7 +12,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   
   signInWithGoogle: async () => {
     if (!supabase) {
-      toast.error('Supabase keys missing in .env.local');
+      toast.error('Supabase configuration missing (Add keys to Netlify Environment Variables)');
       return;
     }
     try {
