@@ -6,6 +6,7 @@ export interface Song {
   duration?: string;
   channelId?: string;
   url?: string;
+  sizeMB?: number;
 }
 
 export interface User {
