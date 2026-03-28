@@ -432,7 +432,7 @@ export const MusicPlayer = () => {
                                     </p>
                                     
                                     <div className="space-y-4 text-zinc-400 font-medium text-lg leading-loose italic opacity-60">
-                                        <p>"{currentSong.title}"</p>
+                                        <p>&quot;{currentSong.title}&quot;</p>
                                         <p>by {currentSong.artist}</p>
                                     </div>
 
