@@ -126,7 +126,10 @@ export const searchMusic = async (query: string): Promise<Song[]> => {
     }));
 
     // Cache results
-    if (searchCache.size > 20) searchCache.delete(searchCache.keys().next().value);
+    if (searchCache.size > 20) {
+        const firstKey = searchCache.keys().next().value;
+        if (firstKey) searchCache.delete(firstKey);
+    }
     searchCache.set(trimmedQuery, results);
 
     return results;
