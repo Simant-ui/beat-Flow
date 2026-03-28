@@ -223,7 +223,7 @@ export default function SettingsPage() {
               <SettingsItem 
                 icon={Eye} 
                 label="Incognito Mode" 
-                description="Don't save playback history for this session"
+                description="Don&apos;t save playback history for this session"
                 theme={theme}
               >
                 <Toggle active={!shareActivity} onClick={() => setShareActivity(!shareActivity)} />

@@ -145,7 +145,7 @@ export default function SearchPage() {
             ) : query.length > 2 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-zinc-500 space-y-4">
                     <AlertCircle className="w-12 h-12 opacity-20" />
-                    <p className="font-medium">No results found for "{query}"</p>
+                    <p className="font-medium">No results found for &quot;{query}&quot;</p>
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-zinc-500 space-y-2">

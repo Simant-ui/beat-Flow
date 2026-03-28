@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Github, Mail, ShieldCheck, Music2 } from 'lucide-react';
+import { Mail, ShieldCheck, Music2, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -44,8 +44,8 @@ export default function LoginPage() {
             </button>
 
             <button className="w-full h-14 bg-zinc-900 text-white border border-white/5 rounded-2xl font-bold flex items-center justify-center gap-4 hover:bg-zinc-800 transition-all active:scale-95">
-              <Github className="w-5 h-5" />
-              <span>Continue with GitHub</span>
+              <LogIn className="w-5 h-5" />
+              <span>Alternative login</span>
             </button>
           </div>
 
