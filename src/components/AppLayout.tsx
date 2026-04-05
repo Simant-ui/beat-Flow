@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { User } from '@/types';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const theme = usePlayerStore(state => state.theme);
@@ -76,24 +77,44 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className={cn(
-      "min-h-screen transition-colors duration-500 pb-40 pt-[env(safe-area-inset-top)]",
-      theme === 'dark' ? "bg-zinc-950 text-white" : "bg-white text-zinc-900"
+      "min-h-screen transition-colors duration-500 pb-40 relative",
+      theme === 'dark' ? "bg-black text-white" : "bg-white text-zinc-900"
     )}>
+      <div className="mesh-bg" />
+      
       <Header />
-      <main className="max-w-4xl mx-auto pt-24 px-6 pb-[env(safe-area-inset-bottom)]">
-        {children}
+      
+      <main className="max-w-4xl mx-auto pt-28 px-6 pb-[env(safe-area-inset-bottom)] relative z-10">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={typeof window !== 'undefined' ? window.location.pathname : 'initial'}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
+
       <MusicPlayer />
       <BottomNav />
       <InstallPrompt />
+      
       <Toaster
         position="top-center"
         toastOptions={{
+          className: 'glass-dark',
           style: {
-            background: '#18181b',
+            background: 'rgba(0,0,0,0.8)',
             color: '#fff',
             border: '1px solid rgba(255,255,255,0.1)',
             backdropFilter: 'blur(10px)',
+            borderRadius: '24px',
+            padding: '12px 24px',
+            fontSize: '14px',
+            fontWeight: 'bold',
           },
         }}
       />

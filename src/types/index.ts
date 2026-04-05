@@ -62,6 +62,15 @@ export interface PlayerState {
   startDownload: (song: Song) => void;
   removeDownloadFromQueue: (songId: string) => void;
   addTransferredSong: (song: Song) => void;
+
+  isShuffled: boolean;
+  repeatMode: 'none' | 'one' | 'all';
+  setShuffled: (isShuffled: boolean) => void;
+  setRepeatMode: (repeatMode: 'none' | 'one' | 'all') => void;
+  
+  // Cloud Sync
+  syncToCloud: (key: string, data: any) => Promise<void>;
+  loadFromCloud: () => Promise<void>;
 }
 
 

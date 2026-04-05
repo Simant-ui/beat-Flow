@@ -55,31 +55,35 @@ export const SongCard = ({ song, index }: SongCardProps) => {
       className="group relative cursor-pointer"
     >
       <div 
-        className="relative aspect-square w-full rounded-2xl overflow-hidden shadow-2xl mb-3 shadow-zinc-950/20 group-hover:shadow-blue-500/10 transition-all duration-300"
+        className="relative aspect-square w-full rounded-[24px] overflow-hidden shadow-2xl mb-4 shadow-black/50 group-hover:shadow-blue-500/20 transition-all duration-700 premium-card"
         onClick={() => setCurrentSong(song)}
       >
         <img 
             src={song.thumbnail} 
             alt={song.title} 
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
         />
-        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <div className="bg-blue-500 p-4 rounded-full shadow-lg shadow-blue-500/40">
-                <Play className="w-6 h-6 text-white fill-current" />
-            </div>
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-sm">
+            <motion.div 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="bg-white text-black p-5 rounded-full shadow-2xl shadow-white/10"
+            >
+                <Play className="w-6 h-6 fill-current" />
+            </motion.div>
         </div>
         
         {/* Actions on Card */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2">
+        <div className="absolute top-4 right-4 flex flex-col gap-2">
             <button
                onClick={(e) => {
                  e.stopPropagation();
                  toggleFavorite(song);
                }}
                className={cn(
-                 "p-2 rounded-full border backdrop-blur-md transition-all duration-300",
+                 "p-2.5 rounded-2xl border backdrop-blur-xl transition-all duration-500",
                  isFavorite 
-                    ? "bg-red-500 border-red-500 text-white scale-110" 
+                    ? "bg-red-500 border-red-500 text-white scale-110 shadow-lg shadow-red-500/30" 
                     : "bg-black/40 border-white/10 text-white/70 hover:text-white opacity-0 group-hover:opacity-100"
                )}
             >
@@ -89,9 +93,9 @@ export const SongCard = ({ song, index }: SongCardProps) => {
             <button
                onClick={handleDownload}
                className={cn(
-                 "p-2 rounded-full border backdrop-blur-md transition-all duration-300",
+                 "p-2.5 rounded-2xl border backdrop-blur-xl transition-all duration-500",
                  isDownloaded 
-                    ? "bg-blue-500 border-blue-500 text-white animate-bounce-short" 
+                    ? "bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-500/30" 
                     : "bg-black/40 border-white/10 text-white/70 hover:text-white opacity-0 group-hover:opacity-100"
                )}
             >
@@ -100,27 +104,28 @@ export const SongCard = ({ song, index }: SongCardProps) => {
         </div>
 
         {isCurrent && isPlaying && (
-            <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 px-2 py-1 rounded-md backdrop-blur-md">
-                <div className="w-1 h-3 bg-blue-400 animate-pulse" />
-                <div className="w-1 h-2 bg-blue-300 animate-pulse delay-75" />
-                <div className="w-1 h-3.5 bg-blue-500 animate-pulse delay-150" />
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/60 px-3 py-1.5 rounded-xl backdrop-blur-xl border border-white/5">
+                <div className="flex gap-1 items-end h-3">
+                    <div className="w-0.5 h-full bg-blue-400 animate-[bounce_1s_infinite]" />
+                    <div className="w-0.5 h-1/2 bg-blue-400 animate-[bounce_1.2s_infinite]" />
+                    <div className="w-0.5 h-3/4 bg-blue-400 animate-[bounce_0.8s_infinite]" />
+                </div>
+                <span className="text-[8px] font-black uppercase tracking-widest text-blue-400">Playing</span>
             </div>
         )}
       </div>
-      <div className="px-1" onClick={() => setCurrentSong(song)}>
-        <div className="flex items-center justify-between">
-            <h3 className={cn(
-                "text-sm font-bold truncate flex-1 transition-colors",
-                isCurrent ? "text-blue-400" : "text-white group-hover:text-blue-200"
-            )}>
-                {song.title}
-            </h3>
-        </div>
-        <div className="flex items-center gap-2">
-            <p className="text-xs text-zinc-500 mt-0.5 truncate group-hover:text-zinc-400 transition-colors">
+      <div className="px-2" onClick={() => setCurrentSong(song)}>
+        <h3 className={cn(
+            "text-sm font-black truncate transition-colors duration-500 tracking-tight",
+            isCurrent ? "text-blue-400" : "text-white group-hover:text-blue-200"
+        )}>
+            {song.title}
+        </h3>
+        <div className="flex items-center gap-2 mt-1">
+            <p className="text-[11px] text-zinc-500 font-bold truncate group-hover:text-zinc-400 transition-colors">
                 {song.artist}
             </p>
-            {isDownloaded && <CheckCircle2 size={10} className="text-blue-500 mt-0.5" />}
+            {isDownloaded && <CheckCircle2 size={10} className="text-blue-500" />}
         </div>
       </div>
     </motion.div>

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { usePlayerStore } from '@/store/usePlayerStore';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -13,11 +14,15 @@ export default function AuthCallbackPage() {
         router.push('/');
         return;
       }
-      const { error } = await supabase.auth.getSession();
-      if (!error) {
+      
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (!error && session) {
+        // Hydrate player store from cloud on login
+        await usePlayerStore.getState().loadFromCloud();
         router.push('/');
       } else {
-        console.error('Auth callback error:', error);
+        console.error('Auth callback error:', error || 'No session');
         router.push('/');
       }
     };

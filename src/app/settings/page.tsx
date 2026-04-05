@@ -190,26 +190,26 @@ export default function SettingsPage() {
                 )}
               >
                   <Smartphone size={24} className="text-purple-500 mb-2" />
-                  <span className="font-bold text-xs uppercase tracking-widest">Beam</span>
-                  <span className="text-[10px] text-zinc-500 mt-1">Ready to Connect</span>
+                  <span className="font-bold text-xs uppercase tracking-widest text-center">Send Music to Friends</span>
+                  <span className="text-[10px] text-zinc-500 mt-1">Quick Share</span>
               </button>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">System Config</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Basic Settings</h2>
             <div className="space-y-3">
               <SettingsItem 
                 icon={theme === 'dark' ? Moon : Sun} 
-                label="Premium Theme" 
-                description="Synchronize app aesthetics with system"
+                label="App Look (Day/Night)" 
+                description="Change how the app looks"
                 theme={theme}
               >
                 <Toggle active={theme === 'dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
               </SettingsItem>
               <SettingsItem 
                 icon={Zap} 
-                label="Data Saver" 
-                description="Force lower stream quality for saving data"
+                label="Save My Internet Data" 
+                description="Use less internet while playing music"
                 theme={theme}
               >
                 <Toggle active={dataSaver} onClick={() => setDataSaver(!dataSaver)} />
@@ -218,20 +218,20 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Privacy & Shield</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Security & Privacy</h2>
             <div className="space-y-3">
               <SettingsItem 
                 icon={Eye} 
-                label="Incognito Mode" 
-                description="Don&apos;t save playback history for this session"
+                label="Private Listening" 
+                description="Don't save song history for now"
                 theme={theme}
               >
                 <Toggle active={!shareActivity} onClick={() => setShareActivity(!shareActivity)} />
               </SettingsItem>
               <SettingsItem 
                 icon={Shield} 
-                label="Shield Protection" 
-                description="Secure your connection via encrypted streams"
+                label="Safe Connection" 
+                description="Keep your music streaming secure"
                 theme={theme}
               >
                 <Toggle active={true} onClick={() => {}} />
@@ -240,12 +240,12 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Storage Cleanup</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Clear Storage Space</h2>
             <div className="space-y-3">
               <SettingsItem 
                 icon={Trash2} 
-                label="Wipe Playback Cache" 
-                description="Clears all recently played song history"
+                label="Clear All History" 
+                description="Delete all recently played songs"
                 theme={theme}
               >
                 <button 
@@ -260,8 +260,8 @@ export default function SettingsPage() {
               </SettingsItem>
               <SettingsItem 
                 icon={Database} 
-                label="Purge Downloads" 
-                description={`Delete all ${downloads.length} offline saved tracks`}
+                label="Delete All Downloaded Music" 
+                description={`Remove all ${downloads.length} saved songs`}
                 theme={theme}
               >
                 <button 
@@ -279,11 +279,11 @@ export default function SettingsPage() {
 
 
           <div className="space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Storage Path</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 px-2">Music Save Location</h2>
             <div className="space-y-3">
               <SettingsItem 
                 icon={FolderOpen} 
-                label="Download Destination" 
+                label="Where to Save Music" 
                 description={`Currently saving to: ${downloadPath}`}
                 theme={theme}
               >
